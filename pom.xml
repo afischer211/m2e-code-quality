@@ -1,36 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>com.basistech.m2e-code-quality</groupId>
     <artifactId>m2e-code-quality-plugins</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
     <scm>
         <connection>scm:git:git://github.com/m2e-code-quality/m2e-code-quality.git</connection>
         <url>scm:git:git://github.com/m2e-code-quality/m2e-code-quality.git</url>
     </scm>
+
     <properties>
-        <tycho-version>0.20.0</tycho-version>
-        <orbit.version>R20120526062928</orbit.version>
+        <target.platform>mars</target.platform>
+
+        <tycho-version>0.22.0</tycho-version>
+        <orbit.version>R20140525021250</orbit.version>
         <main.basedir>${basedir}</main.basedir>
-        
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
+
     <modules>
         <module>com.basistech.m2e.code.quality.shared</module>
         <module>com.basistech.m2e.code.quality.checkstyle</module>
         <module>com.basistech.m2e.code.quality.checkstyle.feature</module>
+        <module>com.basistech.m2e.code.quality.checkstyle.test</module>
         <module>com.basistech.m2e.code.quality.findbugs</module>
         <module>com.basistech.m2e.code.quality.findbugs.feature</module>
+        <module>com.basistech.m2e.code.quality.findbugs.test</module>
         <module>com.basistech.m2e.code.quality.pmd</module>
         <module>com.basistech.m2e.code.quality.pmd.feature</module>
         <module>com.basistech.m2e.code.quality.site</module>
+        <module>mars</module>
+        <module>luna</module>
     </modules>
+
     <prerequisites>
         <maven>3.0</maven>
     </prerequisites>
+
     <repositories>
         <repository>
             <id>m2e</id>
@@ -38,14 +55,14 @@
             <url>http://download.eclipse.org/technology/m2e/releases</url>
         </repository>
         <repository>
-            <id>helios</id>
+            <id>luna</id>
             <layout>p2</layout>
-            <url>http://download.eclipse.org/releases/helios</url>
+            <url>http://download.eclipse.org/releases/luna</url>
         </repository>
         <repository>
             <id>cs</id>
             <layout>p2</layout>
-            <url>http://m2e-code-quality.github.com/m2e-code-quality/checkstyle-p2-repository</url>
+            <url>http://eclipse-cs.sourceforge.net/update</url>
         </repository>
         <repository>
             <id>pmd</id>
@@ -63,6 +80,7 @@
             <url>http://download.eclipse.org/tools/orbit/downloads/drops/${orbit.version}/repository/</url>
         </repository>
     </repositories>
+
     <pluginRepositories>
         <pluginRepository>
             <id>sonatype-public</id>
@@ -75,8 +93,8 @@
             </releases>
         </pluginRepository>
     </pluginRepositories>
+
     <build>
-        <defaultGoal>install</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
@@ -87,8 +105,14 @@
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>target-platform-configuration</artifactId>
-                <version>${tycho-version}</version>
                 <configuration>
+                    <target>
+                        <artifact>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${target.platform}</artifactId>
+                            <version>${project.version}</version>
+                        </artifact>
+                    </target>
                     <resolver>p2</resolver>
                     <pomDependencies>consider</pomDependencies>
                     <ignoreTychoRepositories>true</ignoreTychoRepositories>
@@ -151,15 +175,22 @@
                     <artifactId>tycho-p2-plugin</artifactId>
                     <version>${tycho-version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>target-platform-configuration</artifactId>
+                    <version>${tycho-version}</version>
+                </plugin>
+
                 <!-- important for self-hosting -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>2.7</version>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
+
     <profiles>
         <profile>
             <id>sun-jvm</id>
@@ -211,5 +242,21 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>local-findbugs-p2</id>
+            <activation>
+                <file>
+                    <exists>../com.basistech.m2e.code.quality.findbugs/findbugs.p2/content.xml</exists>
+                </file>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>findbugs</id>
+                    <layout>p2</layout>
+                    <url>file:${project.basedir}/../com.basistech.m2e.code.quality.findbugs/findbugs.p2</url>
+                </repository>
+            </repositories>
+        </profile>
     </profiles>
+
 </project>
