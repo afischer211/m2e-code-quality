@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -313,8 +314,7 @@ public class MavenPluginConfigurationTranslator
 		 */
 		final List<String> includePatterns = this.getIncludes();
 		for (final String folder : sourceFolders) {
-			final String folderRelativePath = this.basedirUri
-			        .relativize(new File(folder).toURI()).getPath();
+			final String folderRelativePath = relativizePath(this.basedirUri,new File(folder).toURI());
 			if (!includePatterns.isEmpty()) {
 				patterns.addAll(
 				        this.normalizePatternsToCheckstyleFileMatchPattern(
@@ -332,8 +332,7 @@ public class MavenPluginConfigurationTranslator
 		 */
 		final List<String> excludePatterns = this.getExcludes();
 		for (final String folder : sourceFolders) {
-			final String folderRelativePath = this.basedirUri
-			        .relativize(new File(folder).toURI()).getPath();
+			final String folderRelativePath = relativizePath(this.basedirUri,new File(folder).toURI());
 			patterns.addAll(this.normalizePatternsToCheckstyleFileMatchPattern(
 			        excludePatterns, this.convertToEclipseCheckstyleRegExpPath(
 			                folderRelativePath),
@@ -345,9 +344,7 @@ public class MavenPluginConfigurationTranslator
 			        this.getResourceIncludes();
 			for (final Resource resource : this.mavenProject.getBuild()
 			        .getResources()) {
-				final String folderRelativePath = this.basedirUri
-				        .relativize(new File(resource.getDirectory()).toURI())
-				        .getPath();
+				final String folderRelativePath = relativizePath(this.basedirUri,new File(resource.getDirectory()).toURI());
 				patterns.addAll(
 				        this.normalizePatternsToCheckstyleFileMatchPattern(
 				                resourceIncludePatterns, folderRelativePath,
@@ -358,9 +355,7 @@ public class MavenPluginConfigurationTranslator
 			        this.getResourceExcludes();
 			for (final Resource resource : this.mavenProject.getBuild()
 			        .getResources()) {
-				final String folderRelativePath = this.basedirUri
-				        .relativize(new File(resource.getDirectory()).toURI())
-				        .getPath();
+				final String folderRelativePath = relativizePath(this.basedirUri,new File(resource.getDirectory()).toURI());
 				patterns.addAll(
 				        this.normalizePatternsToCheckstyleFileMatchPattern(
 				                resourceExcludePatterns, folderRelativePath,
@@ -378,9 +373,7 @@ public class MavenPluginConfigurationTranslator
 					// ignore resources that have ex/includes for now
 					continue;
 				}
-				final String folderRelativePath = this.basedirUri
-				        .relativize(new File(resource.getDirectory()).toURI())
-				        .getPath();
+				final String folderRelativePath = relativizePath(this.basedirUri,new File(resource.getDirectory()).toURI());
 				patterns.addAll(
 				        this.normalizePatternsToCheckstyleFileMatchPattern(
 				                resourceIncludePatterns, folderRelativePath,
@@ -396,9 +389,7 @@ public class MavenPluginConfigurationTranslator
 					// ignore resources that have ex/includes for now
 					continue;
 				}
-				final String folderRelativePath = this.basedirUri
-				        .relativize(new File(resource.getDirectory()).toURI())
-				        .getPath();
+				final String folderRelativePath = relativizePath(this.basedirUri,new File(resource.getDirectory()).toURI());
 				patterns.addAll(
 				        this.normalizePatternsToCheckstyleFileMatchPattern(
 				                resourceExcludePatterns, folderRelativePath,
@@ -409,6 +400,18 @@ public class MavenPluginConfigurationTranslator
 		return patterns;
 	}
 
+	private String relativizePath(URI basePath, URI folderPath) {
+		Path sourcePath = Paths.get(basePath);
+		Path targetPath = Paths.get(folderPath); 
+		Path relativePath = sourcePath.relativize(targetPath);
+		return relativePath.toString().replace("\\","/"); // replace windows-fileseparator with unix-filespearator
+	}
+	
+	private boolean isAbsolutePath(final String path) {
+		Path p = Paths.get(path);
+		return p.isAbsolute();
+	}
+	
 	private String convertToEclipseCheckstyleRegExpPath(final String path) {
 		String csCompatiblePath = path;
 		if (path.endsWith("/")) {
