@@ -111,11 +111,7 @@ public final class ResourceResolver {
 				                + "dependant on classpath ordering; location {} found in {}",
 				        fixedResource, urls);
 			}
-			if(!urls.isEmpty()) {
-				return urls.get(0);
-			} else {
-				return null;
-			}
+			return urls.get(0);
 		} catch (IOException e) {
 			LOG.warn("getResources() failed: " + fixedResource, e);
 			return null;
